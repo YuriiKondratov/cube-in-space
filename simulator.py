@@ -42,7 +42,7 @@ class Simulator:
         self.plane = p
         self.body_view: RigidBodyView = RigidBodyView(rb)
         self.plane_view: PlaneView = PlaneView(p)
-        self.start_simulation(0.01, 100)
+        self.start_simulation(0.01)
 
     def collision_points(self):
         m = min([self.plane.equation(x.pos) for x in self.body.particles])
@@ -69,9 +69,9 @@ class Simulator:
         self.body.angular_velocity = np.matmul(self.body.angular_momentum,
                                                np.linalg.inv(self.body.inertia_tensor).transpose())
 
-    def start_simulation(self, dt, fps):
+    def start_simulation(self, dt):
         while True:
-            time.sleep(1 / fps)
+            time.sleep(dt)
             self.body.eilers_step(dt)
             c_p = self.collision_points()
             if c_p:
