@@ -51,60 +51,72 @@ class Simulator:
                 return list(filter(lambda x: abs(self.plane[i].equation(x.pos) - m) < 0.00001, self.body.particles)),i 
         return False, 1
         """
+        ind = []
+        vert_plus = []
+        vert_minus = []
         index = 0
         for i in self.plane: 
-            vert_plus = []
-            vert_minus = []
+            vert_plus.append([])
+            vert_minus.append([])
             for j in self.body.particles:
                 #if((j.pos[0] + self.body.centre_of_mas_pos[0])*i.unit_normal[0] + (j.pos[1] + self.body.centre_of_mas_pos[1])*i.unit_normal[1] + (j.pos[2] + self.body.centre_of_mas_pos[2])*i.unit_normal[2] -1 > 0):
                 #if(j.pos[0]*i.coefficients[0] + j.pos[1]*i.coefficients[1] + j.pos[2]*i.coefficients[2] - i.coefficients[3] > 0):
                 if(j.pos[0]*i.coefficients[0] + j.pos[1]*i.coefficients[1] + j.pos[2]*i.coefficients[2] - 1 > 0):
-                    vert_plus.append(j)
+                    vert_plus[index].append(j)
                 else:
-                    vert_minus.append(j)
-                if(len(vert_plus) != 0 and len(vert_minus) != 0):
-                    if(len(vert_plus) <= len(vert_minus)):
-                        return vert_plus, index
-                    else:
-                        return vert_minus, index
+                    vert_minus[index].append(j)
+            if(len(vert_plus[index]) != 0 and len(vert_minus[index]) != 0):
+                ind.append(index)
             index += 1
-        return 0, index#"""
+        res = []
+        if(len(ind) != 0):
+            for i in range(len(vert_plus)):
+                if vert_plus[i] != [] and vert_minus[i] != []:
+                    if len(vert_plus[i]) <= len(vert_minus[i]):
+                        res.append(vert_plus[i])
+                    else:
+                        res.append(vert_minus[i])
+                else:
+                    res.append([])
+        return res, ind#"""
     
     def solve_contact(self, points, i):
-        m = sum(x.mass for x in points)
-        point = sum((x.mass * x.pos) for x in points) / m
-        displacement = point - self.body.centre_of_mas_pos
-        vel = self.body.velocity + np.cross(self.body.angular_velocity, displacement)
-        relative_vel = np.dot(self.plane[i].unit_normal, vel) 
-        denominator = np.cross(displacement, self.plane[i].unit_normal)
-        denominator = np.matmul(denominator, np.linalg.inv(self.body.inertia_tensor).transpose())
-        denominator = np.cross(denominator, displacement)
-        denominator = np.dot(self.plane[i].unit_normal, denominator)
-        denominator += 1 / self.body.mass
-        j = -2 * relative_vel / denominator
-        force = j * self.plane[i].unit_normal
-        self.body.linear_momentum += force
-        self.body.angular_momentum += np.cross(displacement, force)
-        self.body.velocity = self.body.linear_momentum / self.body.mass
-        self.body.angular_velocity = np.matmul(self.body.angular_momentum,
-                                               np.linalg.inv(self.body.inertia_tensor).transpose())
+        for f in i:
+            print(len(points[f]))
+            m = sum(x.mass for x in points[f])
+            point = sum((x.mass * x.pos) for x in points[f]) / m
+            displacement = point - self.body.centre_of_mas_pos
+            vel = self.body.velocity + np.cross(self.body.angular_velocity, displacement)
+            relative_vel = np.dot(self.plane[f].unit_normal, vel) 
+            denominator = np.cross(displacement, self.plane[f].unit_normal)
+            denominator = np.matmul(denominator, np.linalg.inv(self.body.inertia_tensor).transpose())
+            denominator = np.cross(denominator, displacement)
+            denominator = np.dot(self.plane[f].unit_normal, denominator)
+            denominator += 1 / self.body.mass
+            j = -2 * relative_vel / denominator
+            force = j * self.plane[f].unit_normal
+            self.body.linear_momentum += force
+            self.body.angular_momentum += np.cross(displacement, force)
+            self.body.velocity = self.body.linear_momentum / self.body.mass
+            self.body.angular_velocity = np.matmul(self.body.angular_momentum,
+                                                   np.linalg.inv(self.body.inertia_tensor).transpose())
 
     def start_simulation(self, dt, fps):
         while True:
             time.sleep(1 / fps)
             self.body.eilers_step(dt)
             c_p, number = self.collision_points()
-            if c_p:
+            if number != []:
                 self.solve_contact(c_p, number)
             self.body_view.update()
 
 
 if __name__ == "__main__":
-    cube = RigidBody(cube_generator(10, 0.2, [-10., 0., 30.]), [1., 50., 25., 100.], [0., 0., 0.], [0., 0., 2500.])
+    cube = RigidBody(cube_generator(10, 0.2, [-10., 0., 30.]), [1., 50., 25., 100.], [-50., -50., 5000.], [0., 0., 25.])
     plane = []
     plane.append(Plane([[25, 25, -8], [25, -25, 1], [-25, -25, 10], [-25, 25, 1]]))
     plane.append(Plane([[100, 40, 100], [100, 40, -100], [-100, 40,-100], [-100, 40, 100]]))
+    plane.append(Plane([[40, 100, 100], [40, 100, -100], [40, -100,-100], [40, -100, 100]]))
     plane.append(Plane([[100, -40, 100], [100, -40, -100], [-100, -40,-100], [-100, -40, 100]]))
-    plane.append(Plane([[40, 100, 100], [40, 100, -100], [40, -100,-100], [40, 100, -100]]))
-    plane.append(Plane([[-40, 100, 100], [-40, 100, -100], [-40, -100,-100], [-40, 100, -100]]))
+    plane.append(Plane([[-40, 100, 100], [-40, 100, -100], [-40, -100,-100], [-40, -100, 100]]))
     s = Simulator(cube, plane)
