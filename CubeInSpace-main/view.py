@@ -21,4 +21,12 @@ class RigidBodyView:
 
 class PlaneView:
     def __init__(self, plane):
-        self.plane = vpython.quad(vs=[vpython.vertex(pos=atov(vert)) for vert in plane.vertices])
+        self.plane = []
+        for i in plane[:2]:
+            self.plane.append(vpython.quad(vs=[vpython.vertex(pos=atov(vert)) for vert in i.vertices], texture=vpython.textures.rug))
+
+        for i in plane[2:4]:
+            self.plane.append(vpython.quad(vs=[vpython.vertex(pos=atov(vert)) for vert in i.vertices], texture=vpython.textures.stucco))
+
+        for i in plane[4:5]:
+            self.plane.append(vpython.quad(vs=[vpython.vertex(pos=atov(vert)) for vert in i.vertices], texture=vpython.textures.metal))

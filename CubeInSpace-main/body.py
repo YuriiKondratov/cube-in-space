@@ -1,3 +1,4 @@
+import vpython
 import numpy as np
 from quaterion import Quaternion
 from copy import deepcopy
@@ -19,6 +20,9 @@ class Particle:
 
 class RigidBody:
     def __init__(self, ps, r_q, l_m, a_m):
+        vpython.scene.width = 1520
+        vpython.scene.height = 725
+        
         self.particles = ps
         self.mass = sum(x.mass for x in self.particles)
 

@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class Plane:
     def __init__(self, vertices):
         self.vertices = vertices
@@ -10,6 +9,8 @@ class Plane:
         self.coefficients = -np.linalg.solve(system_matrix, free_members)
 
         self.unit_normal = self.coefficients / np.dot(self.coefficients, self.coefficients) ** 0.5
+
+        print(self.coefficients)
 
     def equation(self, point):
         a, b, c = self.coefficients[0], self.coefficients[1], self.coefficients[2]
