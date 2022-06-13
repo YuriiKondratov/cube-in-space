@@ -1,2 +1,3 @@
-CubeInSpace
-You need to install all the additional packages to run this project (vpython, numpy etc.)
+CubeInSpace.
+Numerical modeling of dynamic systems course work.
+Simulation of rigid body falling.
