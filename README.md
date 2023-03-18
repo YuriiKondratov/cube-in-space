@@ -5,4 +5,5 @@ This is a simulation of rigid body falling in vacuum. Made as a coursework for a
 To run this project, download all necessary libraries and execute `simulator.py` script. Simulation will open in your browser.
 
 #### Screenshot
-![img.png](screenshot.png)
+
+![image](https://user-images.githubusercontent.com/71669375/226099252-55ff93d4-4af9-4f42-8350-4301023c4c7c.png)
